@@ -35,6 +35,14 @@ public class Player : MonoBehaviour
     [SerializeField] float swayLerpSpeed;
     Vector2 rotationLastFrame;
 
+    [Header("Shooting")]
+    [SerializeField] int bulletCount;
+    [SerializeField] Transform barrel;
+    [SerializeField] float range;
+    [SerializeField] float spread;
+    [SerializeField] LayerMask hitMask;
+    [SerializeField] GameObject bulletImpactPrefab;
+
     // input
     Vector2 moveInput;
     Vector2 turnInput;
@@ -68,6 +76,11 @@ public class Player : MonoBehaviour
         turnInput.y = Input.GetAxis("Mouse Y");
 
         isAiming = Input.GetMouseButton(1);
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Action_Shoot();
+        }
     }
 
     void HandleMovement()
@@ -97,5 +110,21 @@ public class Player : MonoBehaviour
         weaponOffset.localRotation = Quaternion.Lerp(weaponOffset.localRotation, target, swayLerpSpeed * Time.deltaTime);
         rotationLastFrame.x = cameraRef.eulerAngles.x;
         rotationLastFrame.y = transform.eulerAngles.y;
+    }
+
+    void Action_Shoot()
+    {
+        for (int i = 0; i < bulletCount; i++)
+        {
+            Vector3 direction = (barrel.forward + Random.onUnitSphere * spread).normalized;
+
+            if (Physics.Raycast(barrel.position, direction, out RaycastHit hit, range, hitMask))
+            {
+                // spawn impact
+                GameObject impact = Instantiate(bulletImpactPrefab, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
+                Debug.Log(hit.normal);
+                Destroy(impact, 100);
+            }
+        }
     }
 }

@@ -110,8 +110,8 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - _CamPosition: {r: 7.7296476, g: 1.78, b: 9.869755, a: 0}
-    - _CamRotation: {r: 331.25, g: 303.2492, b: 0, a: 0}
+    - _CamPosition: {r: -3.181466, g: 1.7799999, b: -7.438221, a: 0}
+    - _CamRotation: {r: 341.4, g: 152.40045, b: 0, a: 0}
     - _CamScale: {r: 1, g: 1, b: 1, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
