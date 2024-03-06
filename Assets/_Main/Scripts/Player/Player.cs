@@ -22,9 +22,12 @@ public class Player : MonoBehaviour
     // weapon offset
     [Header("Weapon Offset")]
     [SerializeField] Vector3 idleWeaponOffset;
+    [SerializeField] Vector3 idleWeaponRotation;
     [SerializeField] Vector3 aimWeaponOffset;
+    [SerializeField] Vector3 aimWeaponRotation;
     [SerializeField] float aimLerpSpeed;
     Transform weaponOffset;
+    Quaternion weaponRotation;
 
     // weapon sway
     [Header("Weapon Sway")]
@@ -86,6 +89,11 @@ public class Player : MonoBehaviour
         float deltaX = rotationLastFrame.x - cameraRef.eulerAngles.x;
         float deltaY = rotationLastFrame.y - transform.eulerAngles.y;
         Quaternion target = Quaternion.AngleAxis(deltaX * weaponSwayIntensity, Vector3.right) * Quaternion.AngleAxis(deltaY * weaponSwayIntensity, Vector3.up);
+
+        // rotation by offset
+        weaponRotation = Quaternion.Lerp(weaponRotation, Quaternion.Euler(isAiming ? aimWeaponRotation : idleWeaponRotation), aimLerpSpeed * Time.deltaTime);
+        target *= weaponRotation;
+
         weaponOffset.localRotation = Quaternion.Lerp(weaponOffset.localRotation, target, swayLerpSpeed * Time.deltaTime);
         rotationLastFrame.x = cameraRef.eulerAngles.x;
         rotationLastFrame.y = transform.eulerAngles.y;

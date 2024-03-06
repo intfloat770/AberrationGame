@@ -13,6 +13,10 @@ public class Cam : MonoBehaviour
     public float top = 0.2F;
     public float bottom = -0.2F;
 
+    [SerializeField] Material material;
+
+    public Vector3 offset = new Vector3(0, 1, 0);
+
     public void Init()
     {
         // get references
@@ -23,9 +27,17 @@ public class Cam : MonoBehaviour
 
     void LateUpdate()
     {
+        material.SetVector("_CamPosition", cameraRef.transform.position);
+        material.SetVector("_CamRotation", cameraRef.transform.rotation.eulerAngles);
+        material.SetVector("_CamScale", cameraRef.transform.localScale);
         //Camera cam = Camera.main;
         //Matrix4x4 m = PerspectiveOffCenter(left, right, bottom, top, cam.nearClipPlane, cam.farClipPlane);
         //cam.projectionMatrix = m;
+
+        //Vector3 camoffset = new Vector3(-offset.x, -offset.y, offset.z);
+        //Matrix4x4 m = Matrix4x4.TRS(camoffset, Quaternion.identity, new Vector3(1, 1, -1));
+        //cameraRef.worldToCameraMatrix = m * transform.worldToLocalMatrix;
+        material.SetMatrix("_CameraMatrix", transform.worldToLocalMatrix.inverse);
     }
 
     // from docs
