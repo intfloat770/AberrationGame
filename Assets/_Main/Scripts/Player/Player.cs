@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     // components
     CharacterController controller;
+    Animator animator;
 
     // referecnes
     Transform cameraRef;
@@ -35,6 +37,14 @@ public class Player : MonoBehaviour
     [SerializeField] float swayLerpSpeed;
     Vector2 rotationLastFrame;
 
+    [Header("Model-Clipping")]
+    [SerializeField] float clipOriginOffset;
+    [SerializeField] float clipDistance;
+    [SerializeField] Vector3 clipOffset;
+    [SerializeField] Vector3 clipRotation;
+    [SerializeField] LayerMask clipMask;
+    bool isClipping;
+
     [Header("Shooting")]
     [SerializeField] int bulletCount;
     [SerializeField] Transform barrel;
@@ -42,6 +52,14 @@ public class Player : MonoBehaviour
     [SerializeField] float spread;
     [SerializeField] LayerMask hitMask;
     [SerializeField] GameObject bulletImpactPrefab;
+    [SerializeField] float kickStrength;
+    [SerializeField] float kickFallof;
+    float kick;
+
+    [Header("Mag")]
+    [SerializeField] int magCapacity;
+    int roundsLeft;
+    bool roundInBarrel;
 
     // input
     Vector2 moveInput;
@@ -52,10 +70,14 @@ public class Player : MonoBehaviour
     {
         // get components
         controller = GetComponent<CharacterController>();
+        animator = transform.Find("Camera/YBotArms").GetComponent<Animator>();
 
         // get references
         cameraRef = transform.Find("Camera");
         weaponOffset = transform.Find("Camera/YBotArms/WeaponOffset");
+
+        // init state
+        roundInBarrel = true;
     }
 
     void Update()
@@ -77,7 +99,7 @@ public class Player : MonoBehaviour
 
         isAiming = Input.GetMouseButton(1);
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isClipping && roundInBarrel)
         {
             Action_Shoot();
         }
@@ -91,6 +113,9 @@ public class Player : MonoBehaviour
         // rotation
         transform.eulerAngles += Vector3.up * turnInput.x * turnSpeed;
         cameraRef.localRotation = Quaternion.Euler(cameraRotation = Mathf.Clamp(cameraRotation -= turnInput.y * turnSpeed, -80, 80), 0, 0);
+
+        // clipping
+        isClipping = Physics.Raycast(weaponOffset.position + cameraRef.forward * clipOriginOffset, cameraRef.forward, out RaycastHit hit, clipDistance, clipMask);
     }
 
     void HandleAnimation()
@@ -107,13 +132,24 @@ public class Player : MonoBehaviour
         weaponRotation = Quaternion.Lerp(weaponRotation, Quaternion.Euler(isAiming ? aimWeaponRotation : idleWeaponRotation), aimLerpSpeed * Time.deltaTime);
         target *= weaponRotation;
 
+        // rotation by clip prevention
+        if (isClipping)
+            target *= Quaternion.Euler(clipRotation);
+
+        // add kick
+        target *= Quaternion.Euler(Vector3.right * kick);
+        kick -= kick * kickFallof * Time.deltaTime;
+
         weaponOffset.localRotation = Quaternion.Lerp(weaponOffset.localRotation, target, swayLerpSpeed * Time.deltaTime);
         rotationLastFrame.x = cameraRef.eulerAngles.x;
         rotationLastFrame.y = transform.eulerAngles.y;
     }
 
-    void Action_Shoot()
+    async void Action_Shoot()
     {
+        // set state
+        roundInBarrel = false;
+
         for (int i = 0; i < bulletCount; i++)
         {
             Vector3 direction = (barrel.forward + Random.onUnitSphere * spread).normalized;
@@ -126,5 +162,20 @@ public class Player : MonoBehaviour
                 Destroy(impact, 100);
             }
         }
+
+        // add kick
+        kick += kickStrength;
+
+        while (kick < -1)
+        {
+            await Task.Yield();
+        }
+
+        animator.SetTrigger("Shoot");
+
+        await Task.Delay(1000);
+
+        roundInBarrel = true;
+
     }
 }
