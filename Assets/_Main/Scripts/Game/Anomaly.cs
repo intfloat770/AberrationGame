@@ -25,8 +25,8 @@ public class Anomaly : MonoBehaviour
         Vector3 toOrigin = (transform.position - referenceTransform.position).normalized;
         float distance = Vector3.Distance(transform.position, referenceTransform.position);
 
-        Debug.Log(distance);
-            graphics.position = referenceTransform.position + toOrigin * optimalDistance + offset + Vector3.up * distance * heightMultiplier;
+        //Debug.Log(distance);
+            //graphics.position = referenceTransform.position + toOrigin * optimalDistance + offset + Vector3.up * distance * heightMultiplier;
         if (distance - optimalDistance > 0)
         {
             //graphics.localScale = Vector3.one;
@@ -34,7 +34,9 @@ public class Anomaly : MonoBehaviour
         else if (constraintToOrigin)
         {
             graphics.position = transform.position;
-            //graphics.localScale = Vector3.one * distance * scaleImpact;
         }
+
+        //float scale = Mathf.Clamp(distance * scaleImpact, 1, 100);
+        graphics.localScale = Vector3.one * distance * scaleImpact;
     }
 }

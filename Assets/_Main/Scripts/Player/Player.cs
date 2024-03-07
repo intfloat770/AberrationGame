@@ -46,6 +46,13 @@ public class Player : MonoBehaviour
     [SerializeField] LayerMask clipMask;
     bool isClipping;
 
+    [Header("Weapon Aim")]
+    [SerializeField] RectTransform crosshairTransform;
+    [SerializeField] LayerMask aimMask;
+    Vector3 focusPoint = Vector3.one;
+    Vector3 crosshairWorldPosition;
+    [SerializeField] Vector3 offset;
+
     [Header("Shooting")]
     [SerializeField] int bulletCount;
     [SerializeField] Transform barrel;
@@ -98,12 +105,13 @@ public class Player : MonoBehaviour
         
         HandleMovement();
 
+        offset.x += Input.GetAxis("Horizontal") * 100;
+        offset.y += Input.GetAxis("Vertical") * 100;
     }
 
     private void LateUpdate()
     {
         HandleAnimation();
-        
     }
 
     void HandleInput()
@@ -166,6 +174,25 @@ public class Player : MonoBehaviour
 
         // clipping
         isClipping = Physics.Raycast(weaponOffset.position + cameraRef.forward * clipOriginOffset, cameraRef.forward, out RaycastHit hit, clipDistance, clipMask);
+
+        // focus
+        //crosshairWorldPosition = Camera.main.ScreenToWorldPoint();
+        Vector3 input = Input.mousePosition;
+        input.z = 100;
+        Ray ray = Camera.main.ScreenPointToRay(input + offset);
+        //if (Physics.Raycast(crosshairWorldPosition, cameraRef.forward, out RaycastHit result, range, aimMask))
+        if (Physics.Raycast(ray, out RaycastHit result, range, aimMask))
+        {
+            focusPoint = result.point;
+            //Debug.DrawLine(crosshairWorldPosition, crosshairWorldPosition + cameraRef.forward * range, Color.red);
+            Debug.DrawRay(ray.origin, ray.direction * result.distance, Color.red);
+        }
+        else
+        {
+            focusPoint = ray.origin + ray.direction * range;
+            //Debug.DrawLine(crosshairWorldPosition, crosshairWorldPosition + cameraRef.forward * range, Color.green);
+            Debug.DrawRay(ray.origin, ray.direction * range, Color.green);
+        }
     }
 
     void HandleAnimation()
@@ -173,24 +200,31 @@ public class Player : MonoBehaviour
         // offset
         weaponOffset.localPosition = Vector3.Lerp(weaponOffset.localPosition, targetWeaponOffset, aimLerpSpeed * Time.deltaTime);
 
+        // rotation by weapoin aim
+        Quaternion target = Quaternion.LookRotation((focusPoint - barrel.position).normalized);
+        Debug.DrawLine(barrel.position, barrel.position + barrel.forward * range, Color.blue);
+        Debug.DrawLine(barrel.position, barrel.position + (focusPoint - barrel.position).normalized * range, Color.magenta);
+
         // sway
-        float deltaX = rotationLastFrame.x - cameraRef.eulerAngles.x;
-        float deltaY = rotationLastFrame.y - transform.eulerAngles.y;
-        Quaternion target = Quaternion.AngleAxis(deltaX * weaponSwayIntensity, Vector3.right) * Quaternion.AngleAxis(deltaY * weaponSwayIntensity, Vector3.up);
+        //float deltaX = rotationLastFrame.x - cameraRef.eulerAngles.x;
+        //float deltaY = rotationLastFrame.y - transform.eulerAngles.y;
+        //Quaternion target = Quaternion.AngleAxis(deltaX * weaponSwayIntensity, Vector3.right) * Quaternion.AngleAxis(deltaY * weaponSwayIntensity, Vector3.up);
 
         // rotation by offset
-        weaponRotation = Quaternion.Lerp(weaponRotation, Quaternion.Euler(isAiming ? aimWeaponRotation : idleWeaponRotation), aimLerpSpeed * Time.deltaTime);
-        target *= weaponRotation;
+        //weaponRotation = Quaternion.Lerp(weaponRotation, Quaternion.Euler(isAiming ? aimWeaponRotation : idleWeaponRotation), aimLerpSpeed * Time.deltaTime);
+        //target *= weaponRotation;
 
         // rotation by clip prevention
-        if (isClipping)
-            target *= Quaternion.Euler(clipRotation);
+        //if (isClipping)
+        //    target *= Quaternion.Euler(clipRotation);
+
 
         // add kick
-        target *= Quaternion.Euler(Vector3.right * kick);
+        //target *= Quaternion.Euler(Vector3.right * kick);
         kick -= kick * kickFallof * Time.deltaTime;
 
-        weaponOffset.localRotation = Quaternion.Lerp(weaponOffset.localRotation, target, swayLerpSpeed * Time.deltaTime);
+        //weaponOffset.localRotation = Quaternion.Lerp(weaponOffset.localRotation, target, swayLerpSpeed * Time.deltaTime);
+        weaponOffset.rotation = target;
         rotationLastFrame.x = cameraRef.eulerAngles.x;
         rotationLastFrame.y = transform.eulerAngles.y;
     }
@@ -208,6 +242,7 @@ public class Player : MonoBehaviour
 
             if (Physics.Raycast(barrel.position, direction, out RaycastHit hit, range, hitMask))
             {
+                Debug.DrawLine(barrel.position, hit.point, Color.green, 1);
                 if (hit.transform.gameObject.layer == 10)
                 {
                     if (int.TryParse(hit.transform.name.Substring(hit.transform.name.Length - 1), out int materialIndex))
@@ -220,6 +255,8 @@ public class Player : MonoBehaviour
                         Debug.Log($"No material index on gameobject: {hit.transform.name}");
                 }
             }
+            else
+                Debug.DrawLine(barrel.position, barrel.position + direction * range, Color.red, 1);
         }
 
         // add kick
@@ -247,5 +284,11 @@ public class Player : MonoBehaviour
 
         roundInBarrel = true;
 
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(focusPoint, .1f);
     }
 }

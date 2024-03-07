@@ -18,6 +18,7 @@ public class Cam : MonoBehaviour
     public float top = 0.2F;
     public float bottom = -0.2F;
 
+    [SerializeField] RenderTexture renderTexture;
     [SerializeField] Material material;
 
     public Vector3 offset = new Vector3(0, 1, 0);
@@ -60,7 +61,26 @@ public class Cam : MonoBehaviour
         instance.audioReverbFilter.reverbPreset = preset;
     }
 
-    private void OnPostRender()
+    private void OnPreRender()
+    {
+    }
+
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    {
+        //cameraRef.Render();
+        //Debug.Log("f");
+        //Graphics.Blit(source, destination);   
+    }
+
+    //private void OnPostRender()
+    //{
+    //    cameraRef.targetTexture = null;
+    //    cameraRef.Render();
+    //    Graphics.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), renderTexture);
+    //    cameraRef.targetTexture = renderTexture;
+    //}
+
+    private void OnPre()
     {
         //Graphics.Blit(isometricCamera.targetTexture, cameraRef.targetTexture);
     }
