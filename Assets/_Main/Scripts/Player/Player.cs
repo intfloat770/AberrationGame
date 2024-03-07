@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
     [SerializeField] float range;
     [SerializeField] float spread;
     [SerializeField] LayerMask hitMask;
-    [SerializeField] GameObject bulletImpactPrefab;
+    [SerializeField] GameObject[] bulletImpactPrefabs;
     [SerializeField] float kickStrength;
     [SerializeField] float kickFallof;
     float kick;
@@ -65,6 +65,9 @@ public class Player : MonoBehaviour
     [Header("Shooting Visuals")]
     [SerializeField] GameObject muzzleFlashLight;
     [SerializeField] int muzzleFlashDuration;
+
+    [Header("Flash light")]
+    [SerializeField] GameObject flashLight;
 
     // input
     Vector2 moveInput;
@@ -122,6 +125,12 @@ public class Player : MonoBehaviour
         {
             Action_Shoot();
         }
+
+        // toggle flash light
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            flashLight.SetActive(!flashLight.activeInHierarchy);
+        }
     }
 
     void HandleMovement()
@@ -177,10 +186,17 @@ public class Player : MonoBehaviour
 
             if (Physics.Raycast(barrel.position, direction, out RaycastHit hit, range, hitMask))
             {
-                // spawn impact
-                GameObject impact = Instantiate(bulletImpactPrefab, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
-                Debug.Log(hit.normal);
-                Destroy(impact, 100);
+                if (hit.transform.gameObject.layer == 10)
+                {
+                    if (int.TryParse(hit.transform.name.Substring(hit.transform.name.Length - 1), out int materialIndex))
+                    {
+                        // spawn impact
+                        GameObject impact = Instantiate(bulletImpactPrefabs[materialIndex - 1], hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
+                        Destroy(impact, 100);
+                    }
+                    else
+                        Debug.Log($"No material index on gameobject: {hit.transform.name}");
+                }
             }
         }
 
