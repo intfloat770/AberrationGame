@@ -39,7 +39,7 @@ class IsometricPass : CustomPass
                 continue;
             }
 
-            Matrix4x4 matrix = Matrix4x4.TRS(t.position, Quaternion.identity, Vector3.one);
+            Matrix4x4 matrix = Matrix4x4.TRS(t.position, Quaternion.Euler(-90, 0, 0), Vector3.one * 100);
             ctx.cmd.DrawMesh(mesh, matrix, isometricMaterial, 0, isometricMaterial.FindPass("ForwardOnly"));
         }
 

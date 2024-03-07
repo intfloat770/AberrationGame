@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Cam : MonoBehaviour
 {
+    static Cam instance; 
+
     // references
     Camera cameraRef;
     Camera isometricCamera;
@@ -20,30 +22,42 @@ public class Cam : MonoBehaviour
 
     public Vector3 offset = new Vector3(0, 1, 0);
 
+    // audio
+    AudioReverbFilter audioReverbFilter;
+
     public void Init()
     {
+        instance = this;
+
         // get references
         cameraRef = GetComponent<Camera>();
-        isometricCamera = transform.Find("Isometric Camera").GetComponent<Camera>();
+        //isometricCamera = transform.Find("Isometric Camera").GetComponent<Camera>();
 
         ogProjection = Matrix4x4.identity;
+
+        audioReverbFilter = GetComponent<AudioReverbFilter>();
     }
 
     void LateUpdate()
     {
-        material.SetVector("_CamPosition", cameraRef.transform.position);
-        material.SetVector("_CamRotation", cameraRef.transform.rotation.eulerAngles);
-        material.SetVector("_CamScale", cameraRef.transform.localScale);
-        //Camera cam = Camera.main;
-        //Matrix4x4 m = PerspectiveOffCenter(left, right, bottom, top, cam.nearClipPlane, cam.farClipPlane);
-        //cam.projectionMatrix = m;
+        //material.SetVector("_CamPosition", cameraRef.transform.position);
+        //material.SetVector("_CamRotation", cameraRef.transform.rotation.eulerAngles);
+        //material.SetVector("_CamScale", cameraRef.transform.localScale);
+        ////Camera cam = Camera.main;
+        ////Matrix4x4 m = PerspectiveOffCenter(left, right, bottom, top, cam.nearClipPlane, cam.farClipPlane);
+        ////cam.projectionMatrix = m;
 
-        //Vector3 camoffset = new Vector3(-offset.x, -offset.y, offset.z);
-        //Matrix4x4 m = Matrix4x4.TRS(camoffset, Quaternion.identity, new Vector3(1, 1, -1));
-        //cameraRef.worldToCameraMatrix = m * transform.worldToLocalMatrix;
-        material.SetMatrix("_CameraMatrix", transform.worldToLocalMatrix.inverse);
+        ////Vector3 camoffset = new Vector3(-offset.x, -offset.y, offset.z);
+        ////Matrix4x4 m = Matrix4x4.TRS(camoffset, Quaternion.identity, new Vector3(1, 1, -1));
+        ////cameraRef.worldToCameraMatrix = m * transform.worldToLocalMatrix;
+        //material.SetMatrix("_CameraMatrix", transform.worldToLocalMatrix.inverse);
 
 
+    }
+
+    public static void SetReverbFilter(AudioReverbPreset preset)
+    {
+        instance.audioReverbFilter.reverbPreset = preset;
     }
 
     private void OnPostRender()

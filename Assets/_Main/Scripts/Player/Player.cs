@@ -68,6 +68,7 @@ public class Player : MonoBehaviour
 
     [Header("Flash light")]
     [SerializeField] GameObject flashLight;
+    bool waitForFlashlightInput;
 
     // input
     Vector2 moveInput;
@@ -97,7 +98,12 @@ public class Player : MonoBehaviour
         
         HandleMovement();
 
+    }
+
+    private void LateUpdate()
+    {
         HandleAnimation();
+        
     }
 
     void HandleInput()
@@ -129,7 +135,23 @@ public class Player : MonoBehaviour
         // toggle flash light
         if (Input.GetKeyDown(KeyCode.F))
         {
-            flashLight.SetActive(!flashLight.activeInHierarchy);
+            if (flashLight.activeInHierarchy)
+            {
+                flashLight.SetActive(false);
+                waitForFlashlightInput = true;
+            }
+
+            //flashLight.SetActive(!flashLight.activeInHierarchy);
+            //await Task.Delay(200);
+            AudioManager.PlaySound("FlashLightDown");
+        }
+        if (Input.GetKeyUp(KeyCode.F))
+        {
+            if (!flashLight.activeInHierarchy && !waitForFlashlightInput)
+                flashLight.SetActive(true);
+
+            AudioManager.PlaySound("FlashLightUp");
+            waitForFlashlightInput = false;
         }
     }
 
