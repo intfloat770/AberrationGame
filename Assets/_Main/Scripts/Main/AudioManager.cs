@@ -9,6 +9,7 @@ public class SoundData
     public string soundID;
     [HideInInspector] public GameObject gameObject;
     [HideInInspector] public AudioSource audioSource;
+    public float localVolume;
     public AudioClip clip;
 }
 
@@ -16,6 +17,7 @@ public class AudioManager : MonoBehaviour
 {
     static AudioManager instance;
 
+    [SerializeField] float globalVolume;
     [SerializeField] SoundData[] soundData;
 
     public void Init()
@@ -37,6 +39,7 @@ public class AudioManager : MonoBehaviour
         {
             if (sound.soundID.Equals(soundID))
             {
+                sound.audioSource.volume = sound.localVolume * instance.globalVolume;
                 sound.audioSource.Play();
             }
         }

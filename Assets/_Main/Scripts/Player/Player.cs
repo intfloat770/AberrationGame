@@ -61,6 +61,10 @@ public class Player : MonoBehaviour
     [SerializeField] int magCapacity;
     int roundsLeft;
     bool roundInBarrel;
+    
+    [Header("Shooting Visuals")]
+    [SerializeField] GameObject muzzleFlashLight;
+    [SerializeField] int muzzleFlashDuration;
 
     // input
     Vector2 moveInput;
@@ -79,6 +83,9 @@ public class Player : MonoBehaviour
 
         // init state
         roundInBarrel = true;
+
+        // prepare visuals
+        muzzleFlashLight.SetActive(false);
     }
 
     void Update()
@@ -162,6 +169,8 @@ public class Player : MonoBehaviour
         // set state
         roundInBarrel = false;
 
+        AudioManager.PlaySound("ShotgunShoot");
+
         for (int i = 0; i < bulletCount; i++)
         {
             Vector3 direction = (barrel.forward + Random.onUnitSphere * spread).normalized;
@@ -177,6 +186,11 @@ public class Player : MonoBehaviour
 
         // add kick
         kick += kickStrength;
+
+        // show muzzle flash
+        muzzleFlashLight.SetActive(true);
+        await Task.Delay(muzzleFlashDuration);
+        muzzleFlashLight.SetActive(false);
 
         while (kick < -1)
         {
