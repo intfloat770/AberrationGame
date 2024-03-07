@@ -6,3 +6,12 @@ https://sketchfab.com/3d-models/shotgun-bec49e6f99e347cbb60e6390b2c4202c
 
 y bot:
 https://www.mixamo.com
+
+sounds from:
+https://samplefocus.com
+  gun-reload-fx_D#
+  gun-reload-sound-fx_C_minor
+  shotgun-recharge-fx_265bpm
+
+https://pixabay.com
+  12-gauge-shell-drop-47604

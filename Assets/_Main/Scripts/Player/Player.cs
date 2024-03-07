@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     [SerializeField] Vector3 aimWeaponRotation;
     [SerializeField] float aimLerpSpeed;
     Transform weaponOffset;
+    Vector3 targetWeaponOffset;
     Quaternion weaponRotation;
 
     // weapon sway
@@ -64,7 +65,7 @@ public class Player : MonoBehaviour
     // input
     Vector2 moveInput;
     Vector2 turnInput;
-    bool isAiming;
+    bool isAiming, wasAimingLastFrame;
 
     public void Init()
     {
@@ -98,6 +99,17 @@ public class Player : MonoBehaviour
         turnInput.y = Input.GetAxis("Mouse Y");
 
         isAiming = Input.GetMouseButton(1);
+        if (isAiming && !wasAimingLastFrame) 
+        {
+            targetWeaponOffset = aimWeaponOffset;
+            animator.SetBool("Aiming", true);
+        }
+        else if (!isAiming && wasAimingLastFrame)
+        {
+            targetWeaponOffset = idleWeaponOffset;
+            animator.SetBool("Aiming", false);
+        }
+        wasAimingLastFrame = isAiming;
 
         if (Input.GetMouseButtonDown(0) && !isClipping && roundInBarrel)
         {
@@ -121,7 +133,7 @@ public class Player : MonoBehaviour
     void HandleAnimation()
     {
         // offset
-        weaponOffset.localPosition = Vector3.Lerp(weaponOffset.localPosition, isAiming ? aimWeaponOffset : idleWeaponOffset, aimLerpSpeed * Time.deltaTime);
+        weaponOffset.localPosition = Vector3.Lerp(weaponOffset.localPosition, targetWeaponOffset, aimLerpSpeed * Time.deltaTime);
 
         // sway
         float deltaX = rotationLastFrame.x - cameraRef.eulerAngles.x;
@@ -171,9 +183,15 @@ public class Player : MonoBehaviour
             await Task.Yield();
         }
 
+        await Task.Delay(250);
+        
         animator.SetTrigger("Shoot");
 
-        await Task.Delay(1000);
+        await Task.Delay(250);
+
+        AudioManager.PlaySound("RackShotgun");
+
+        await Task.Delay(500);
 
         roundInBarrel = true;
 

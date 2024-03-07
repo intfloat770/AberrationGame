@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class Cam : MonoBehaviour
 {
     // references
     Camera cameraRef;
+    Camera isometricCamera;
+    [SerializeField] RenderTexture result;
 
     Matrix4x4 ogProjection;
     public float left = -0.2F;
@@ -21,6 +24,7 @@ public class Cam : MonoBehaviour
     {
         // get references
         cameraRef = GetComponent<Camera>();
+        isometricCamera = transform.Find("Isometric Camera").GetComponent<Camera>();
 
         ogProjection = Matrix4x4.identity;
     }
@@ -38,6 +42,13 @@ public class Cam : MonoBehaviour
         //Matrix4x4 m = Matrix4x4.TRS(camoffset, Quaternion.identity, new Vector3(1, 1, -1));
         //cameraRef.worldToCameraMatrix = m * transform.worldToLocalMatrix;
         material.SetMatrix("_CameraMatrix", transform.worldToLocalMatrix.inverse);
+
+
+    }
+
+    private void OnPostRender()
+    {
+        //Graphics.Blit(isometricCamera.targetTexture, cameraRef.targetTexture);
     }
 
     // from docs

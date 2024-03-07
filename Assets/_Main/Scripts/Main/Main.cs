@@ -6,10 +6,12 @@ public class Main : MonoBehaviour
 {
     [SerializeField] Player player;
     [SerializeField] Cam cam;
+    [SerializeField] AudioManager audioManager;
 
     private void Awake()
     {
-        // init player
+        // init
+        audioManager.Init();
         player.Init();
         cam.Init();
 
