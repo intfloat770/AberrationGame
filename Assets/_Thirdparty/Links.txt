@@ -18,3 +18,6 @@ https://pixabay.com
   080902_shotgun-39753
   shotgun-sounds-6464
   flashlight-clicking-on-105809
+
+  glass shader from:
+  https://github.com/alelievr/HDRP-Custom-Passes/tree/master

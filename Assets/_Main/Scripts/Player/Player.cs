@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     // components
     CharacterController controller;
     Animator animator;
+    bool isAnimatorPlaying;
 
     // referecnes
     Transform cameraRef;
@@ -41,7 +42,6 @@ public class Player : MonoBehaviour
     [Header("Model-Clipping")]
     [SerializeField] float clipOriginOffset;
     [SerializeField] float clipDistance;
-    [SerializeField] Vector3 clipOffset;
     [SerializeField] Vector3 clipRotation;
     [SerializeField] LayerMask clipMask;
     bool isClipping;
@@ -51,7 +51,7 @@ public class Player : MonoBehaviour
     [SerializeField] LayerMask aimMask;
     Vector3 focusPoint = Vector3.one;
     Vector3 crosshairWorldPosition;
-    [SerializeField] Vector3 offset;
+    [SerializeField] Vector3 aimOffset;
 
     [Header("Shooting")]
     [SerializeField] int bulletCount;
@@ -104,9 +104,6 @@ public class Player : MonoBehaviour
         HandleInput();
         
         HandleMovement();
-
-        offset.x += Input.GetAxis("Horizontal") * 100;
-        offset.y += Input.GetAxis("Vertical") * 100;
     }
 
     private void LateUpdate()
@@ -147,18 +144,27 @@ public class Player : MonoBehaviour
             {
                 flashLight.SetActive(false);
                 waitForFlashlightInput = true;
+                AudioManager.PlaySound("FlashLightDown");
             }
-
+            else
+            {
+                AudioManager.PlaySound("FlashLightUp");
+            }
             //flashLight.SetActive(!flashLight.activeInHierarchy);
             //await Task.Delay(200);
-            AudioManager.PlaySound("FlashLightDown");
         }
         if (Input.GetKeyUp(KeyCode.F))
         {
             if (!flashLight.activeInHierarchy && !waitForFlashlightInput)
+            {
                 flashLight.SetActive(true);
+                AudioManager.PlaySound("FlashLightDown");
+            }
+            else
+            {
+                AudioManager.PlaySound("FlashLightUp");
+            }
 
-            AudioManager.PlaySound("FlashLightUp");
             waitForFlashlightInput = false;
         }
     }
@@ -173,42 +179,53 @@ public class Player : MonoBehaviour
         cameraRef.localRotation = Quaternion.Euler(cameraRotation = Mathf.Clamp(cameraRotation -= turnInput.y * turnSpeed, -80, 80), 0, 0);
 
         // clipping
-        isClipping = Physics.Raycast(weaponOffset.position + cameraRef.forward * clipOriginOffset, cameraRef.forward, out RaycastHit hit, clipDistance, clipMask);
+        //Vector3 targetWeapon = cameraRef.TransformDirection(isAiming ? aimWeaponOffset : idleWeaponOffset) - Vector3.up * cameraRef.position.y;
+        Vector3 direction = (focusPoint - weaponOffset.position).normalized; //Quaternion.LookRotation((focusPoint - barrel.position).normalized) * cameraRef.forward;
+        isClipping = Physics.Raycast(weaponOffset.position, direction, out RaycastHit hit, clipDistance, clipMask);
+        Debug.DrawLine(focusPoint, weaponOffset.position, Color.cyan);
+        Debug.DrawLine(weaponOffset.position, weaponOffset.position + direction * clipDistance, Color.yellow);
 
-        // focus
-        //crosshairWorldPosition = Camera.main.ScreenToWorldPoint();
-        Vector3 input = Input.mousePosition;
-        input.z = 100;
-        Ray ray = Camera.main.ScreenPointToRay(input + offset);
-        //if (Physics.Raycast(crosshairWorldPosition, cameraRef.forward, out RaycastHit result, range, aimMask))
-        if (Physics.Raycast(ray, out RaycastHit result, range, aimMask))
+        // focus point
+        if (Physics.Raycast(cameraRef.position + aimOffset, cameraRef.forward, out RaycastHit result, range, aimMask))
         {
             focusPoint = result.point;
-            //Debug.DrawLine(crosshairWorldPosition, crosshairWorldPosition + cameraRef.forward * range, Color.red);
-            Debug.DrawRay(ray.origin, ray.direction * result.distance, Color.red);
+            Debug.DrawLine(cameraRef.position + aimOffset, cameraRef.position + aimOffset + cameraRef.forward * range, Color.red);
         }
         else
         {
-            focusPoint = ray.origin + ray.direction * range;
-            //Debug.DrawLine(crosshairWorldPosition, crosshairWorldPosition + cameraRef.forward * range, Color.green);
-            Debug.DrawRay(ray.origin, ray.direction * range, Color.green);
+            focusPoint = cameraRef.position + aimOffset + cameraRef.forward * range;
+            Debug.DrawLine(cameraRef.position + aimOffset, cameraRef.position + aimOffset + cameraRef.forward * range, Color.green);
         }
     }
 
     void HandleAnimation()
     {
+        //if (isAnimatorPlaying)
+        //    return;
+
         // offset
         weaponOffset.localPosition = Vector3.Lerp(weaponOffset.localPosition, targetWeaponOffset, aimLerpSpeed * Time.deltaTime);
 
+        Quaternion target = Quaternion.identity;
+
         // rotation by weapoin aim
-        Quaternion target = Quaternion.LookRotation((focusPoint - barrel.position).normalized);
-        Debug.DrawLine(barrel.position, barrel.position + barrel.forward * range, Color.blue);
-        Debug.DrawLine(barrel.position, barrel.position + (focusPoint - barrel.position).normalized * range, Color.magenta);
+        if (!isClipping)
+        {
+            target = Quaternion.LookRotation((focusPoint - barrel.position).normalized);
+            Debug.DrawLine(barrel.position, barrel.position + barrel.forward * range, Color.blue);
+            Debug.DrawLine(barrel.position, barrel.position + (focusPoint - barrel.position).normalized * range, Color.magenta);
+        }
+
+        // rotation by clipping
+        else
+        {
+            target = transform.rotation * Quaternion.Euler(clipRotation);
+        }
 
         // sway
-        //float deltaX = rotationLastFrame.x - cameraRef.eulerAngles.x;
-        //float deltaY = rotationLastFrame.y - transform.eulerAngles.y;
-        //Quaternion target = Quaternion.AngleAxis(deltaX * weaponSwayIntensity, Vector3.right) * Quaternion.AngleAxis(deltaY * weaponSwayIntensity, Vector3.up);
+        float deltaX = rotationLastFrame.x - cameraRef.eulerAngles.x;
+        float deltaY = rotationLastFrame.y - transform.eulerAngles.y;
+        target *= Quaternion.AngleAxis(deltaX * weaponSwayIntensity, Vector3.right) * Quaternion.AngleAxis(deltaY * weaponSwayIntensity, Vector3.up);
 
         // rotation by offset
         //weaponRotation = Quaternion.Lerp(weaponRotation, Quaternion.Euler(isAiming ? aimWeaponRotation : idleWeaponRotation), aimLerpSpeed * Time.deltaTime);
@@ -220,11 +237,10 @@ public class Player : MonoBehaviour
 
 
         // add kick
-        //target *= Quaternion.Euler(Vector3.right * kick);
+        target *= Quaternion.Euler(Vector3.right * kick);
         kick -= kick * kickFallof * Time.deltaTime;
 
-        //weaponOffset.localRotation = Quaternion.Lerp(weaponOffset.localRotation, target, swayLerpSpeed * Time.deltaTime);
-        weaponOffset.rotation = target;
+        weaponOffset.rotation = Quaternion.Lerp(weaponOffset.rotation, target, swayLerpSpeed * Time.deltaTime);
         rotationLastFrame.x = cameraRef.eulerAngles.x;
         rotationLastFrame.y = transform.eulerAngles.y;
     }
@@ -275,6 +291,7 @@ public class Player : MonoBehaviour
         await Task.Delay(250);
         
         animator.SetTrigger("Shoot");
+        isAnimatorPlaying = true;
 
         await Task.Delay(250);
 
@@ -283,6 +300,7 @@ public class Player : MonoBehaviour
         await Task.Delay(500);
 
         roundInBarrel = true;
+        isAnimatorPlaying = false;
 
     }
 
