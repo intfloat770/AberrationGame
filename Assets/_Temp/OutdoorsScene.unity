@@ -3615,6 +3615,11 @@ MonoBehaviour:
     audioSource: {fileID: 0}
     localVolume: 1
     clip: {fileID: 8300000, guid: 45e1e4a23f536534bb9468abddfab939, type: 3}
+  - soundID: ShellBounce
+    gameObject: {fileID: 0}
+    audioSource: {fileID: 0}
+    localVolume: 0.5
+    clip: {fileID: 8300000, guid: d9f274897ed951143b0395a3d98dd5d1, type: 3}
   - soundID: FlashLightDown
     gameObject: {fileID: 0}
     audioSource: {fileID: 0}
@@ -7566,6 +7571,7 @@ MonoBehaviour:
   localEjectionForce: {x: 100, y: 100, z: 0}
   localEjectionTorque: {x: 100, y: 0, z: 0}
   flashLight: {fileID: 884620987}
+  testInt: 1
 --- !u!143 &662163220
 CharacterController:
   m_ObjectHideFlags: 0

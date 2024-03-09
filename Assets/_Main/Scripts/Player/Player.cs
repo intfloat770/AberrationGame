@@ -70,8 +70,9 @@ public class Player : MonoBehaviour
     [Header("Mag")]
     [SerializeField] int magCapacity;
     int roundsLeft;
-    bool roundInBarrel;
-    
+    bool hasRoundInBarrel;
+    bool hasEmptyShellInBarrel;
+
     [Header("Shooting Visuals")]
     [SerializeField] GameObject muzzleFlashLight;
     [SerializeField] int muzzleFlashDuration;
@@ -89,6 +90,8 @@ public class Player : MonoBehaviour
     Vector2 turnInput;
     bool isAiming, wasAimingLastFrame;
 
+    [SerializeField] int testInt;
+
     public void Init()
     {
         // get components
@@ -100,7 +103,7 @@ public class Player : MonoBehaviour
         weaponOffset = transform.Find("Camera/YBotArms/WeaponOffset");
 
         // init state
-        roundInBarrel = true;
+        hasRoundInBarrel = false;
 
         // prepare visuals
         muzzleFlashLight.SetActive(false);
@@ -127,24 +130,31 @@ public class Player : MonoBehaviour
         turnInput.y = Input.GetAxis("Mouse Y");
 
         isAiming = Input.GetMouseButton(1);
-        if (isAiming && !wasAimingLastFrame) 
-        {
-            targetWeaponOffset = aimWeaponOffset;
-        }
-        else if (!isAiming && wasAimingLastFrame)
+        targetWeaponOffset = isAiming ? aimWeaponOffset : idleWeaponOffset;
+        //if (isAiming && !wasAimingLastFrame) 
+        //{
+        //    targetWeaponOffset = aimWeaponOffset;
+        //}
+        //else if (!isAiming && wasAimingLastFrame)
+        //{
+        //    targetWeaponOffset = idleWeaponOffset;
+        //}
+        //wasAimingLastFrame = isAiming;
+
+        // overrite
+        if (isReloadingMagazine)
         {
             targetWeaponOffset = idleWeaponOffset;
         }
-        wasAimingLastFrame = isAiming;
 
         // shooting
-        if (Input.GetMouseButtonDown(0) && !isClipping && roundInBarrel)
+        if (Input.GetMouseButtonDown(0) && !isClipping && hasRoundInBarrel && !isReloadingMagazine)
         {
             Action_Shoot();
         }
 
         // reloading
-        if (Input.GetKeyDown(KeyCode.R) && !isClipping)
+        if (Input.GetKeyDown(KeyCode.R) && !isClipping && !isReloadingMagazine)
         {
             Action_Reload();
         }
@@ -259,11 +269,12 @@ public class Player : MonoBehaviour
 
     async void Action_Shoot()
     {
-        if (!roundInBarrel)
+        if (!hasRoundInBarrel)
             return;
 
         // set state
-        roundInBarrel = false;
+        hasRoundInBarrel = false;
+        hasEmptyShellInBarrel = true;
 
         AudioManager.PlaySound("ShotgunShoot");
 
@@ -312,11 +323,11 @@ public class Player : MonoBehaviour
         isAnimatorPlaying = true;
         await Task.Delay(250);
         AudioManager.PlaySound("RackShotgun");
-        await Task.Delay(30);
+        await Task.Delay(150);
         EjectShell();
         await Task.Delay(500);
 
-        roundInBarrel = true;
+        hasRoundInBarrel = true;
         roundsLeft--;
         isAnimatorPlaying = false;
 
@@ -338,20 +349,22 @@ public class Player : MonoBehaviour
             AudioManager.PlaySound("ReloadRound");
             await Task.Delay(600);
         }
-        isReloadingMagazine = false;
 
         // final rack
         await Task.Delay(300);
         animator.SetTrigger("MagRack");
         AudioManager.PlaySound("RackShotgun");
+        await Task.Delay(450);
         EjectShell();
+        hasRoundInBarrel = true;
         roundsLeft--;
-        roundInBarrel = true;
 
         // idle 
         await Task.Delay(1000);
         animator.SetTrigger("Idle");
-        await Task.Delay(2500);
+        await Task.Delay(250);
+        
+        isReloadingMagazine = false;
 
         // load barrel
         //animator.SetTrigger("Shoot");
@@ -363,13 +376,18 @@ public class Player : MonoBehaviour
 
     void EjectShell()
     {
-        GameObject obj = Instantiate(ejectedShell);
-        obj.transform.position = ejectionPoint.position;
-        obj.transform.rotation = ejectionPoint.rotation;
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
-        rb.AddForce(ejectionPoint.TransformDirection(localEjectionForce));
-        rb.AddTorque(ejectionPoint.TransformDirection(localEjectionTorque));
-        Destroy(obj, 100);
+        if (hasRoundInBarrel || hasEmptyShellInBarrel)
+        {
+            hasRoundInBarrel = false;
+            hasEmptyShellInBarrel = false;
+            GameObject obj = Instantiate(ejectedShell);
+            obj.transform.position = ejectionPoint.position;
+            obj.transform.rotation = ejectionPoint.rotation;
+            Rigidbody rb = obj.GetComponent<Rigidbody>();
+            rb.AddForce(ejectionPoint.TransformDirection(localEjectionForce));
+            rb.AddTorque(ejectionPoint.TransformDirection(localEjectionTorque));
+            Destroy(obj, 100);
+        }
     }
 
     private void OnDrawGizmos()

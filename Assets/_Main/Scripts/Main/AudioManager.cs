@@ -41,7 +41,9 @@ public class AudioManager : MonoBehaviour
             {
                 sound.audioSource.volume = sound.localVolume * instance.globalVolume;
                 sound.audioSource.Play();
+                return;
             }
         }
+        Debug.LogError($"Unable to player sound with ID '{soundID}'!");
     }
 }

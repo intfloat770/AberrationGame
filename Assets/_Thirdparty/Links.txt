@@ -27,3 +27,6 @@ fps arms:
 map assets:
 "tanker box metallic industrial" (https://skfb.ly/oPY7Y) by adventurer is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 "Industrial Asset Pack" (https://skfb.ly/oFV7p) by vmatthew is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+
+binoculars
+"TNV/DTNVS" (https://skfb.ly/orGIL) by AntijnvanderGun is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
