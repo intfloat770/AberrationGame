@@ -323,7 +323,7 @@ public class Player : MonoBehaviour
         isAnimatorPlaying = true;
         await Task.Delay(250);
         AudioManager.PlaySound("RackShotgun");
-        await Task.Delay(150);
+        await Task.Delay(200);
         EjectShell();
         await Task.Delay(500);
 
