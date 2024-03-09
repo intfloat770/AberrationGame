@@ -1,5 +1,5 @@
 shot gun:
-https://sketchfab.com/3d-models/shotgun-bec49e6f99e347cbb60e6390b2c4202c
+"Shotgun" (https://skfb.ly/o7OvI) by Jonathan Steylaerts is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
 y bot:
 https://www.mixamo.com
@@ -20,4 +20,4 @@ https://pixabay.com
   https://github.com/alelievr/HDRP-Custom-Passes/tree/master
 
 fps arms:
-https://sketchfab.com/3d-models/gloves-for-fps-game-3b321da343714e9597e3e86af8a0a7a6
+"Gloves for fps game" (https://skfb.ly/6TICP) by bobeer is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
