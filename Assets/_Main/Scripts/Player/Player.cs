@@ -60,6 +60,7 @@ public class Player : MonoBehaviour
     [SerializeField] int bulletCount;
     [SerializeField] Transform barrel;
     [SerializeField] float range;
+    [SerializeField] float deadRange;
     [SerializeField] float spread;
     [SerializeField] LayerMask hitMask;
     [SerializeField] GameObject[] bulletImpactPrefabs;
@@ -215,8 +216,8 @@ public class Player : MonoBehaviour
         }
         else
         {
-            focusPoint = cameraRef.position + aimOffset + cameraRef.forward * range;
-            Debug.DrawLine(cameraRef.position + aimOffset, cameraRef.position + aimOffset + cameraRef.forward * range, Color.green);
+            focusPoint = cameraRef.position + aimOffset + cameraRef.forward * deadRange;
+            Debug.DrawLine(cameraRef.position + aimOffset, cameraRef.position + aimOffset + cameraRef.forward * deadRange, Color.green);
         }
     }
 
@@ -241,7 +242,7 @@ public class Player : MonoBehaviour
         // rotation by clipping
         else
         {
-            target = transform.rotation * Quaternion.Euler(clipRotation);
+            target = cameraRef.rotation * Quaternion.Euler(clipRotation);
         }
 
         // sway
