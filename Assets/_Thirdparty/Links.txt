@@ -1,5 +1,7 @@
 shot gun:
 "Shotgun" (https://skfb.ly/o7OvI) by Jonathan Steylaerts is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
++ shells
+"Ammunition Box & Ammunition" (https://skfb.ly/onoS9) by creationwasteland is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
 y bot:
 https://www.mixamo.com
@@ -21,3 +23,7 @@ https://pixabay.com
 
 fps arms:
 "Gloves for fps game" (https://skfb.ly/6TICP) by bobeer is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+
+map assets:
+"tanker box metallic industrial" (https://skfb.ly/oPY7Y) by adventurer is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Industrial Asset Pack" (https://skfb.ly/oFV7p) by vmatthew is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

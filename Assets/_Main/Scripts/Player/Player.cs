@@ -8,10 +8,13 @@ public class Player : MonoBehaviour
     // components
     CharacterController controller;
     Animator animator;
-    bool isAnimatorPlaying;
 
     // referecnes
     Transform cameraRef;
+
+    // state
+    bool isReloadingMagazine;
+    bool isAnimatorPlaying;
 
     // walking
     [Header("Movement")]
@@ -72,6 +75,10 @@ public class Player : MonoBehaviour
     [Header("Shooting Visuals")]
     [SerializeField] GameObject muzzleFlashLight;
     [SerializeField] int muzzleFlashDuration;
+    [SerializeField] GameObject ejectedShell;
+    [SerializeField] Transform ejectionPoint;
+    [SerializeField] Vector3 localEjectionForce;
+    [SerializeField] Vector3 localEjectionTorque;
 
     [Header("Flash light")]
     [SerializeField] GameObject flashLight;
@@ -123,12 +130,10 @@ public class Player : MonoBehaviour
         if (isAiming && !wasAimingLastFrame) 
         {
             targetWeaponOffset = aimWeaponOffset;
-            animator.SetBool("Aiming", true);
         }
         else if (!isAiming && wasAimingLastFrame)
         {
             targetWeaponOffset = idleWeaponOffset;
-            animator.SetBool("Aiming", false);
         }
         wasAimingLastFrame = isAiming;
 
@@ -307,6 +312,8 @@ public class Player : MonoBehaviour
         isAnimatorPlaying = true;
         await Task.Delay(250);
         AudioManager.PlaySound("RackShotgun");
+        await Task.Delay(30);
+        EjectShell();
         await Task.Delay(500);
 
         roundInBarrel = true;
@@ -315,10 +322,54 @@ public class Player : MonoBehaviour
 
     }
 
-    void Action_Reload()
+    async void Action_Reload()
     {
-        roundsLeft = magCapacity - 1;
+        isReloadingMagazine = true;
+
+        animator.SetTrigger("ReloadPose");
+
+        await Task.Delay(250);
+
+        // reload mag
+        while (roundsLeft < magCapacity)
+        {
+            roundsLeft++;
+            animator.SetTrigger("ReloadRound");
+            AudioManager.PlaySound("ReloadRound");
+            await Task.Delay(600);
+        }
+        isReloadingMagazine = false;
+
+        // final rack
+        await Task.Delay(300);
+        animator.SetTrigger("MagRack");
+        AudioManager.PlaySound("RackShotgun");
+        EjectShell();
+        roundsLeft--;
         roundInBarrel = true;
+
+        // idle 
+        await Task.Delay(1000);
+        animator.SetTrigger("Idle");
+        await Task.Delay(2500);
+
+        // load barrel
+        //animator.SetTrigger("Shoot");
+        //await Task.Delay(250);
+        //AudioManager.PlaySound("RackShotgun");
+
+
+    }
+
+    void EjectShell()
+    {
+        GameObject obj = Instantiate(ejectedShell);
+        obj.transform.position = ejectionPoint.position;
+        obj.transform.rotation = ejectionPoint.rotation;
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        rb.AddForce(ejectionPoint.TransformDirection(localEjectionForce));
+        rb.AddTorque(ejectionPoint.TransformDirection(localEjectionTorque));
+        Destroy(obj, 100);
     }
 
     private void OnDrawGizmos()
