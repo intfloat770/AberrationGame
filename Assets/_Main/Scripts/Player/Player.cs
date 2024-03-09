@@ -132,9 +132,16 @@ public class Player : MonoBehaviour
         }
         wasAimingLastFrame = isAiming;
 
+        // shooting
         if (Input.GetMouseButtonDown(0) && !isClipping && roundInBarrel)
         {
             Action_Shoot();
+        }
+
+        // reloading
+        if (Input.GetKeyDown(KeyCode.R) && !isClipping)
+        {
+            Action_Reload();
         }
 
         // toggle flash light
@@ -181,9 +188,9 @@ public class Player : MonoBehaviour
         // clipping
         //Vector3 targetWeapon = cameraRef.TransformDirection(isAiming ? aimWeaponOffset : idleWeaponOffset) - Vector3.up * cameraRef.position.y;
         Vector3 direction = (focusPoint - weaponOffset.position).normalized; //Quaternion.LookRotation((focusPoint - barrel.position).normalized) * cameraRef.forward;
-        isClipping = Physics.Raycast(weaponOffset.position, direction, out RaycastHit hit, clipDistance, clipMask);
+        isClipping = Physics.Raycast(weaponOffset.position + direction * clipOriginOffset, direction, out RaycastHit hit, clipDistance, clipMask);
         Debug.DrawLine(focusPoint, weaponOffset.position, Color.cyan);
-        Debug.DrawLine(weaponOffset.position, weaponOffset.position + direction * clipDistance, Color.yellow);
+        Debug.DrawLine(weaponOffset.position + direction * clipOriginOffset, weaponOffset.position + direction * clipOriginOffset + direction * clipDistance, Color.yellow);
 
         // focus point
         if (Physics.Raycast(cameraRef.position + aimOffset, cameraRef.forward, out RaycastHit result, range, aimMask))
@@ -247,6 +254,9 @@ public class Player : MonoBehaviour
 
     async void Action_Shoot()
     {
+        if (!roundInBarrel)
+            return;
+
         // set state
         roundInBarrel = false;
 
@@ -283,25 +293,32 @@ public class Player : MonoBehaviour
         await Task.Delay(muzzleFlashDuration);
         muzzleFlashLight.SetActive(false);
 
+        // reload
+        if (roundsLeft == 0)
+            return;
+
         while (kick < -1)
         {
             await Task.Yield();
         }
 
         await Task.Delay(250);
-        
         animator.SetTrigger("Shoot");
         isAnimatorPlaying = true;
-
         await Task.Delay(250);
-
         AudioManager.PlaySound("RackShotgun");
-
         await Task.Delay(500);
 
         roundInBarrel = true;
+        roundsLeft--;
         isAnimatorPlaying = false;
 
+    }
+
+    void Action_Reload()
+    {
+        roundsLeft = magCapacity - 1;
+        roundInBarrel = true;
     }
 
     private void OnDrawGizmos()
