@@ -149,7 +149,7 @@ public class Player : MonoBehaviour
         }
 
         // shooting
-        if (Input.GetMouseButtonDown(0) && !isClipping && hasRoundInBarrel && !isReloadingMagazine)
+        if (Input.GetMouseButtonDown(0) && !isClipping && !isReloadingMagazine)
         {
             Action_Shoot();
         }
@@ -271,7 +271,10 @@ public class Player : MonoBehaviour
     async void Action_Shoot()
     {
         if (!hasRoundInBarrel)
+        {
+            AudioManager.PlaySound("EmptyClip");
             return;
+        }
 
         // set state
         hasRoundInBarrel = false;

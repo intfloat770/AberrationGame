@@ -17,6 +17,7 @@ https://pixabay.com
   080902_shotgun-39753
   shotgun-sounds-6464
   flashlight-clicking-on-105809
+  rifle-clip-empty-98832
 
   glass shader from:
   https://github.com/alelievr/HDRP-Custom-Passes/tree/master
@@ -27,6 +28,13 @@ fps arms:
 map assets:
 "tanker box metallic industrial" (https://skfb.ly/oPY7Y) by adventurer is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 "Industrial Asset Pack" (https://skfb.ly/oFV7p) by vmatthew is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Low poly industrial ceiling lamp" (https://skfb.ly/ovyMR) by sauti is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Industrial steel table" (https://skfb.ly/oIOrW) by pawuwa is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Industrial Storage Rack" (https://skfb.ly/6VHDQ) by siddharthkalbage is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Cables on floor" (https://skfb.ly/oPSyY) by nooraha is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Freebie - Game Art: Vintage Fuse Box" (https://skfb.ly/6QVHD) by Alex Filip is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Electric box scan No. 1" (https://skfb.ly/oxq8T) by 3Dystopia is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Metal Door" (https://skfb.ly/6Vpv6) by Spellkaze is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
 binoculars
 "TNV/DTNVS" (https://skfb.ly/orGIL) by AntijnvanderGun is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
