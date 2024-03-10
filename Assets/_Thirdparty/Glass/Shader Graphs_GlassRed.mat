@@ -23,7 +23,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Shader Graphs_Glass 1
+  m_Name: Shader Graphs_GlassRed
   m_Shader: {fileID: -6465566751694194690, guid: 1bc46135972b7b34ea601f2fc5bdb55d,
     type: 3}
   m_Parent: {fileID: 0}
@@ -69,7 +69,7 @@ Material:
     m_Floats:
     - Vector1_2D18398C: 2.01
     - Vector1_5E914F63: 1
-    - Vector1_C5F22ABC: 0.501
+    - Vector1_C5F22ABC: 0.668
     - _AddPrecomputedVelocity: 0
     - _AlphaCutoffEnable: 0
     - _AlphaDstBlend: 10

@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Anomaly : MonoBehaviour
 {
+    Rigidbody rb;
+
     [SerializeField] Transform graphics;
     [SerializeField] float optimalDistance;
     [SerializeField] float scaleImpact;
@@ -22,14 +24,41 @@ public class Anomaly : MonoBehaviour
     [SerializeField] Light lightRef;
     [SerializeField] float maxIntensity;
 
+    bool isEnraged;
+    [SerializeField] Material chillMaterial;
+    [SerializeField] Material chillMaterial2;
+    [SerializeField] Material enragedMaterial;
+    [SerializeField] Material enragedMaterial2;
+    [SerializeField] Color chillLightColor;
+    [SerializeField] Color enragedLightColor;
+    [SerializeField] MeshRenderer meshRenderer;
+    [SerializeField] MeshRenderer meshRenderer2;
+
+    [SerializeField] float initialDelay;
+    [SerializeField] float maxDistance;
+    [SerializeField] AnimationCurve distanceCurve;
+    [SerializeField] float distanceMultiplier;
+    [SerializeField] AnimationCurve jumpCurve;
+    [SerializeField] float jumpStrength;
+    [SerializeField] AnimationCurve spinCurve;
+    [SerializeField] float spinStrength;
+    [SerializeField] AnimationCurve impulseCurve;
+    [SerializeField] float impulseStrength;
+    float impulseTime;
+    float delta;
+    float percent;
+
     // Start is called before the first frame update
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
+        meshRenderer.material = chillMaterial;
+        meshRenderer2.material = chillMaterial2;
         
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
         //Vector3 toOrigin = (transform.position - referenceTransform.position).normalized;
         //float distance = Vector3.Distance(transform.position, referenceTransform.position);
@@ -54,15 +83,55 @@ public class Anomaly : MonoBehaviour
         //graphics.localScale = Vector3.one * percent;
 
         float distance = Vector3.Distance(transform.position, Camera.main.transform.position);
-        float scale = (targetScreenHeight * distance) / 540f;
-        graphics.localScale = Vector3.one * scale;
+        graphics.localScale = Vector3.one * (targetScreenHeight * distance) / 540f;
 
         // light
         if (useLight)
         {
-            lightRef.intensity = scale / maxWorldScale * maxIntensity;
+            //lightRef.intensity = scale / maxWorldScale * maxIntensity;
+            lightRef.transform.position = transform.position + Vector3.up * .1f;
         }
 
         //Debug.Log($"size on screen: {sizeOnScreen}, delta: {delta}, percent: {percent}");
+
+        if (isEnraged)
+        {
+            impulseTime -= Time.deltaTime;
+            delta = percent;
+            percent = distance / maxDistance;
+            delta = delta - percent;
+            impulseTime *= Mathf.Clamp01(1 - delta * distanceMultiplier);
+
+            if (impulseTime < 0)
+            {
+                float force = distanceCurve.Evaluate(percent) * distanceMultiplier;
+                rb.AddForce(Random.onUnitSphere * spinCurve.Evaluate(percent) * jumpStrength);
+                rb.AddTorque(Random.onUnitSphere * spinCurve.Evaluate(percent) * spinStrength);
+                impulseTime = impulseCurve.Evaluate(percent) * impulseStrength;
+            }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+        
+        isEnraged = true;
+        meshRenderer.material = enragedMaterial;
+        meshRenderer2.material = enragedMaterial2;
+        lightRef.color = enragedLightColor;
+        impulseTime = initialDelay;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        isEnraged = false;
+        meshRenderer.material = chillMaterial;
+        meshRenderer2.material = chillMaterial2;
+        lightRef.color = chillLightColor;
     }
 }
