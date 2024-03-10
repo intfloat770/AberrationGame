@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEditor.Profiling.HierarchyFrameDataView;
 
 public class Player : MonoBehaviour
 {
     // components
     CharacterController controller;
-    Animator animator;
+    [HideInInspector] public Animator animator;
 
     // referecnes
     Transform cameraRef;
@@ -15,6 +16,11 @@ public class Player : MonoBehaviour
     // state
     bool isReloadingMagazine;
     bool isAnimatorPlaying;
+
+    // permissions
+    [HideInInspector] public bool canMove = true;
+    [HideInInspector] public bool canTurnCamera = true;
+    public bool hasGun;
 
     // walking
     [Header("Movement")]
@@ -43,6 +49,7 @@ public class Player : MonoBehaviour
     Vector2 rotationLastFrame;
 
     [Header("Model-Clipping")]
+    [SerializeField] Transform viewModel;
     [SerializeField] float clipOriginOffset;
     [SerializeField] float clipDistance;
     [SerializeField] Vector3 clipRotation;
@@ -73,6 +80,7 @@ public class Player : MonoBehaviour
     int roundsLeft;
     bool hasRoundInBarrel;
     bool hasEmptyShellInBarrel;
+    bool stopReloading;
 
     [Header("Shooting Visuals")]
     [SerializeField] GameObject muzzleFlashLight;
@@ -108,6 +116,7 @@ public class Player : MonoBehaviour
 
         // prepare visuals
         muzzleFlashLight.SetActive(false);
+        viewModel.gameObject.SetActive(false);
     }
 
     void Update()
@@ -149,15 +158,32 @@ public class Player : MonoBehaviour
         }
 
         // shooting
-        if (Input.GetMouseButtonDown(0) && !isClipping && !isReloadingMagazine)
+        if (Input.GetMouseButtonDown(0) && hasGun && !isClipping)
         {
-            Action_Shoot();
+            if (isReloadingMagazine)
+            {
+                stopReloading = true;
+            }
+            else
+            {
+                Action_Shoot();
+            }
+        }
+
+        if (isClipping && isReloadingMagazine)
+        {
+            stopReloading = true;
         }
 
         // reloading
-        if (Input.GetKeyDown(KeyCode.R) && !isClipping && !isReloadingMagazine)
+        if (Input.GetKeyDown(KeyCode.R) && hasGun && !isClipping && !isReloadingMagazine && !isAnimatorPlaying)
         {
             Action_Reload();
+        }
+
+        if (Input.GetKeyDown(KeyCode.X) && hasGun && !isClipping && !isReloadingMagazine && !isAnimatorPlaying)
+        {
+            Action_ManuelRack();
         }
 
         // toggle flash light
@@ -195,11 +221,17 @@ public class Player : MonoBehaviour
     void HandleMovement()
     {
         // movement
-        controller.Move((transform.right * moveInput.x + transform.forward * moveInput.y + Vector3.down) * speed * Time.deltaTime);
+        if (canMove)
+        {
+            controller.Move((transform.right * moveInput.x + transform.forward * moveInput.y + Vector3.down) * speed * Time.deltaTime);
+        }
 
         // rotation
-        transform.eulerAngles += Vector3.up * turnInput.x * turnSpeed;
-        cameraRef.localRotation = Quaternion.Euler(cameraRotation = Mathf.Clamp(cameraRotation -= turnInput.y * turnSpeed, -80, 80), 0, 0);
+        if (canTurnCamera)
+        {
+            transform.eulerAngles += Vector3.up * turnInput.x * turnSpeed;
+            cameraRef.localRotation = Quaternion.Euler(cameraRotation = Mathf.Clamp(cameraRotation -= turnInput.y * turnSpeed, -80, 80), 0, 0);
+        }
 
         // clipping
         //Vector3 targetWeapon = cameraRef.TransformDirection(isAiming ? aimWeaponOffset : idleWeaponOffset) - Vector3.up * cameraRef.position.y;
@@ -225,6 +257,9 @@ public class Player : MonoBehaviour
     {
         //if (isAnimatorPlaying)
         //    return;
+
+        if (!hasGun)
+            return;
 
         // offset
         weaponOffset.localPosition = Vector3.Lerp(weaponOffset.localPosition, targetWeaponOffset, aimLerpSpeed * Time.deltaTime);
@@ -321,10 +356,16 @@ public class Player : MonoBehaviour
         {
             await Task.Yield();
         }
-
+        
         await Task.Delay(250);
-        animator.SetTrigger("Shoot");
+
+        if (isReloadingMagazine || isAnimatorPlaying)
+        {
+            return;
+        }
+        
         isAnimatorPlaying = true;
+        animator.SetTrigger("Shoot");
         await Task.Delay(250);
         AudioManager.PlaySound("RackShotgun");
         await Task.Delay(200);
@@ -340,10 +381,19 @@ public class Player : MonoBehaviour
     async void Action_Reload()
     {
         isReloadingMagazine = true;
+        isAnimatorPlaying = true;
 
         animator.SetTrigger("ReloadPose");
 
         await Task.Delay(250);
+
+        if (isClipping)
+        {
+            isReloadingMagazine = false;
+            isAnimatorPlaying = false;
+            animator.SetTrigger("Idle");
+            return;
+        }
 
         // reload mag
         while (roundsLeft < magCapacity)
@@ -352,10 +402,25 @@ public class Player : MonoBehaviour
             animator.SetTrigger("ReloadRound");
             AudioManager.PlaySound("ReloadRound");
             await Task.Delay(600);
+
+            if (isClipping)
+            {
+                isReloadingMagazine = false;
+                isAnimatorPlaying = false;
+                animator.SetTrigger("Idle");
+                return;
+            }
+
+            if (stopReloading)
+            {
+                stopReloading = false;
+                break;
+            }
+
         }
 
         // final rack
-        await Task.Delay(300);
+        //await Task.Delay(300);
         animator.SetTrigger("MagRack");
         AudioManager.PlaySound("RackShotgun");
         await Task.Delay(450);
@@ -364,11 +429,13 @@ public class Player : MonoBehaviour
         roundsLeft--;
 
         // idle 
-        await Task.Delay(1000);
+        await Task.Delay(300);
         animator.SetTrigger("Idle");
         await Task.Delay(250);
-        
+
+        isAnimatorPlaying = false;
         isReloadingMagazine = false;
+        stopReloading = false;
 
         // load barrel
         //animator.SetTrigger("Shoot");
@@ -376,6 +443,27 @@ public class Player : MonoBehaviour
         //AudioManager.PlaySound("RackShotgun");
 
 
+    }
+
+    async void Action_ManuelRack()
+    {
+        isAnimatorPlaying = true;
+
+        animator.SetTrigger("Shoot");
+        AudioManager.PlaySound("RackShotgun");
+        await Task.Delay(450);
+        EjectShell();
+
+        if (roundsLeft > 0)
+        {
+            hasRoundInBarrel = true;
+            roundsLeft--;
+        }
+
+        await Task.Delay(300);
+        animator.SetTrigger("Idle");
+        await Task.Delay(250);
+        isAnimatorPlaying = false;
     }
 
     void EjectShell()
@@ -398,5 +486,37 @@ public class Player : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(focusPoint, .1f);
+    }
+
+    public void SetPosition(Vector3 position)
+    {
+        controller.Move(position - transform.position);
+    }
+
+    public void SetHorizontalRotation(float rotation)
+    {
+        transform.eulerAngles = Vector3.up * rotation;
+    }
+
+    public void SetVerticalRotation(float rotation)
+    {
+        cameraRotation = rotation;
+        cameraRef.localEulerAngles = Vector3.right * rotation;
+    }
+
+    public float GetHorizontalRotation()
+    {
+        return transform.eulerAngles.y;
+    }
+
+    public float GetVerticalRotation()
+    {
+        return cameraRef.localEulerAngles.x;
+    }
+
+    public void PickupGun()
+    {
+        hasGun = true;
+        viewModel.gameObject.SetActive(true);
     }
 }

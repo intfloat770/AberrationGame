@@ -68,8 +68,8 @@ Material:
     m_Ints: []
     m_Floats:
     - Vector1_2D18398C: 2.01
-    - Vector1_5E914F63: 1.17
-    - Vector1_C5F22ABC: 0.371
+    - Vector1_5E914F63: 1
+    - Vector1_C5F22ABC: 0.722
     - _AddPrecomputedVelocity: 0
     - _AlphaCutoffEnable: 0
     - _AlphaDstBlend: 10
