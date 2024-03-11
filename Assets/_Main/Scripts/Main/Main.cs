@@ -45,11 +45,14 @@ public class Main : MonoBehaviour
             player.transform.position = playerStartPosition;
             player.transform.rotation = Quaternion.identity;
         }
+        else
+        {
+            player.PickupGun();
+        }
 
         canvas.gameObject.SetActive(false);
         await Task.Delay(10);
         canvas.gameObject.SetActive(true);
-
     }
 
     private void Update()

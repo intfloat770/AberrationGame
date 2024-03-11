@@ -13,6 +13,9 @@ public class Pickup : MonoBehaviour, Interactable
 
     public bool IsUseable()
     {
+        if (area == null)
+            return false;
+
         return area.containsPlayer;
     }
 
@@ -29,6 +32,7 @@ public class Pickup : MonoBehaviour, Interactable
 
     public void Use()
     {
+        AudioManager.PlaySound("PickupGun");
         isUsed = true;
         player.PickupGun();
         ammo.SetActive(false);

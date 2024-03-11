@@ -7,24 +7,27 @@ public class Anomaly : MonoBehaviour
 {
     Rigidbody rb;
 
+    [Header("Setup")]
     [SerializeField] Transform graphics;
-    [SerializeField] float optimalDistance;
-    [SerializeField] float scaleImpact;
-    [SerializeField] bool constraintToOrigin;
-    [SerializeField] Transform referenceTransform;
-    [SerializeField] Vector3 offset;
-    [SerializeField] float heightMultiplier;
+    //[SerializeField] float optimalDistance;
+    //[SerializeField] float scaleImpact;
+    //[SerializeField] bool constraintToOrigin;
+    //[SerializeField] Transform referenceTransform;
+    //[SerializeField] Vector3 offset;
+    //[SerializeField] float heightMultiplier;
 
-    [SerializeField] Transform test01;
-    [SerializeField] Transform test02;
+    //[SerializeField] Transform test01;
+    //[SerializeField] Transform test02;
     [SerializeField] float targetScreenHeight;
-    [SerializeField] float maxWorldScale;
+    [SerializeField] float maxWorldSize;
+    [SerializeField] float gravity;
+    //[SerializeField] float maxWorldScale;
 
     [SerializeField] bool useLight;
     [SerializeField] Light lightRef;
-    [SerializeField] float maxIntensity;
+    //[SerializeField] float maxIntensity;
 
-    bool isEnraged;
+    [Header("Colors")]
     [SerializeField] Material chillMaterial;
     [SerializeField] Material chillMaterial2;
     [SerializeField] Material enragedMaterial;
@@ -33,7 +36,9 @@ public class Anomaly : MonoBehaviour
     [SerializeField] Color enragedLightColor;
     [SerializeField] MeshRenderer meshRenderer;
     [SerializeField] MeshRenderer meshRenderer2;
+    bool isEnraged;
 
+    [Header("Impulses")]
     [SerializeField] float initialDelay;
     [SerializeField] float maxDistance;
     [SerializeField] AnimationCurve distanceCurve;
@@ -48,13 +53,15 @@ public class Anomaly : MonoBehaviour
     float delta;
     float percent;
 
+    [Header("Health")]
+    public int health;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         meshRenderer.material = chillMaterial;
         meshRenderer2.material = chillMaterial2;
-        
     }
 
     // Update is called once per frame
@@ -83,7 +90,7 @@ public class Anomaly : MonoBehaviour
         //graphics.localScale = Vector3.one * percent;
 
         float distance = Vector3.Distance(transform.position, Camera.main.transform.position);
-        graphics.localScale = Vector3.one * (targetScreenHeight * distance) / 540f;
+        graphics.localScale = Vector3.one * Mathf.Clamp((targetScreenHeight * distance) / 540f, 0, maxWorldSize);
 
         // light
         if (useLight)
@@ -110,6 +117,10 @@ public class Anomaly : MonoBehaviour
                 impulseTime = impulseCurve.Evaluate(percent) * impulseStrength;
             }
         }
+        else
+        {
+            rb.AddForce(Vector3.down * gravity);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -133,5 +144,13 @@ public class Anomaly : MonoBehaviour
         meshRenderer.material = chillMaterial;
         meshRenderer2.material = chillMaterial2;
         lightRef.color = chillLightColor;
+    }
+
+    public void OnTakeDamage()
+    {
+        if (health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }

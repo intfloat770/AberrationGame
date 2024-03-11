@@ -71,6 +71,7 @@ public class Player : MonoBehaviour
 
     [Header("Shooting")]
     [SerializeField] int bulletCount;
+    [SerializeField] int damage;
     [SerializeField] Transform barrel;
     [SerializeField] float range;
     [SerializeField] float deadRange;
@@ -186,6 +187,11 @@ public class Player : MonoBehaviour
         }
 
         if (isClipping && isReloadingMagazine)
+        {
+            stopReloading = true;
+        }
+
+        if (Input.GetMouseButtonDown(1) && isReloadingMagazine)
         {
             stopReloading = true;
         }
@@ -358,7 +364,10 @@ public class Player : MonoBehaviour
 
             if (Physics.Raycast(barrel.position, direction, out RaycastHit hit, range, hitMask))
             {
+                //Debug.Log(hit.transform.name);
                 Debug.DrawLine(barrel.position, hit.point, Color.green, 1);
+
+                // environment
                 if (hit.transform.gameObject.layer == 10)
                 {
                     if (int.TryParse(hit.transform.name.Substring(hit.transform.name.Length - 1), out int materialIndex))
@@ -369,6 +378,20 @@ public class Player : MonoBehaviour
                     }
                     else
                         Debug.Log($"No material index on gameobject: {hit.transform.name}");
+                }
+
+                // anomaly
+                if (hit.transform.gameObject.layer == 8)
+                {
+                    Debug.Log(hit.transform.name);
+                    Anomaly anomly = hit.transform.GetComponent<Anomaly>();
+                    anomly.health -= damage;
+                    anomly.OnTakeDamage();
+                }
+
+                if (hit.transform.TryGetComponent(out Shootable shootable))
+                {
+                    shootable.OnHit(damage);
                 }
             }
             else
