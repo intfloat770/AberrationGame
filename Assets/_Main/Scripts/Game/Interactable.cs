@@ -5,6 +5,6 @@ using UnityEngine;
 
 public interface Interactable
 {
-    public bool IsTargetInTrigger();
-    public void MoveTargetToPosition();
+    public bool IsUseable();
+    public void Use();
 }

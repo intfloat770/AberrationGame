@@ -22,6 +22,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Gold
+    second: {fileID: 2100000, guid: e044856fb90d6214485348585eefb35f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Light
     second: {fileID: 2100000, guid: 21aad01a5f40325438ccd3cf61b407f3, type: 2}
   - first:
@@ -39,6 +44,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Metall 02
     second: {fileID: 2100000, guid: b3803e61917e9b448810bb15db37e124, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Steel
+    second: {fileID: 2100000, guid: 36bc3347ff2e9b24ab51bf8f82a9bd46, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

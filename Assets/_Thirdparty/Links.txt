@@ -18,9 +18,13 @@ https://pixabay.com
   shotgun-sounds-6464
   flashlight-clicking-on-105809
   rifle-clip-empty-98832
+  electric-door-32317
+  concrete-footsteps-6752
+  item-pickup-37089
+  pickup_item-64282
 
-  glass shader from:
-  https://github.com/alelievr/HDRP-Custom-Passes/tree/master
+glass shader from:
+https://github.com/alelievr/HDRP-Custom-Passes/tree/master
 
 fps arms:
 "Gloves for fps game" (https://skfb.ly/6TICP) by bobeer is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

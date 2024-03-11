@@ -26,6 +26,12 @@ public class Player : MonoBehaviour
     [Header("Movement")]
     [SerializeField] float speed;
 
+    [Header("Walking Visuals")]
+    [SerializeField] AnimationCurve walkingCurve;
+    [SerializeField] float stepSpeed = 1;
+    float walkingValue;
+    bool walkingDirection;
+
     // turning
     [Header("Turning")]
     [SerializeField] float turnSpeed;
@@ -135,6 +141,15 @@ public class Player : MonoBehaviour
     {
         moveInput.x = Input.GetAxis("Horizontal");
         moveInput.y = Input.GetAxis("Vertical");
+
+        if (moveInput.magnitude > 1)
+            moveInput.Normalize();
+
+        if (moveInput == Vector2.zero)
+        {
+            walkingDirection = false;
+            walkingValue = .1f;
+        }
 
         turnInput.x = Input.GetAxis("Mouse X");
         turnInput.y = Input.GetAxis("Mouse Y");
@@ -250,6 +265,26 @@ public class Player : MonoBehaviour
         {
             focusPoint = cameraRef.position + aimOffset + cameraRef.forward * deadRange;
             Debug.DrawLine(cameraRef.position + aimOffset, cameraRef.position + aimOffset + cameraRef.forward * deadRange, Color.green);
+        }
+
+        // visuals
+        if (walkingDirection)
+        {
+            walkingValue += Time.deltaTime * stepSpeed * moveInput.magnitude;
+            if (walkingValue > 1)
+            {
+                walkingDirection = false;
+                AudioManager.PlaySound("Step01");
+            }
+        }
+        else
+        {
+            walkingValue -= Time.deltaTime * stepSpeed * moveInput.magnitude;
+            if (walkingValue < 0)
+            {
+                walkingDirection = true;
+                AudioManager.PlaySound("Step02");
+            }
         }
     }
 
@@ -518,5 +553,6 @@ public class Player : MonoBehaviour
     {
         hasGun = true;
         viewModel.gameObject.SetActive(true);
+        animator.Play("Player_Shotgun_Idle");
     }
 }

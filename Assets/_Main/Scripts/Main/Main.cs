@@ -68,9 +68,9 @@ public class Main : MonoBehaviour
 
     void State_Tunnel()
     {
-        if (Input.GetKeyDown(KeyCode.E) && tunnelSwitchArea.IsTargetInTrigger())
+        if (Input.GetKeyDown(KeyCode.E) && tunnelSwitchArea.IsUseable())
         {
-            tunnelSwitchArea.MoveTargetToPosition();
+            tunnelSwitchArea.Use();
         }
     }
 

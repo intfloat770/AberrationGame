@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class GateSwitch : MonoBehaviour, Interactable
 {
+    // components
+    Animation animationComp;
+
     [SerializeField] ColliderArea area;
     [SerializeField] Player target;
     [SerializeField] Vector3 inputPosition;
@@ -12,33 +16,46 @@ public class GateSwitch : MonoBehaviour, Interactable
     [SerializeField] float targetLerpSpeed;
     bool isMovingTarget;
 
-    [SerializeField] Vector3 targetPosition;
-    [SerializeField] Vector2 targetRotation;
+    Vector3 targetPosition;
+    Vector2 targetRotation;
 
-    Vector3 cachePosition;
-    Vector2 cacheRotation;
+    Vector3 cachedPosition;
+    Vector2 cachedRotation;
+    bool isOpen;
 
-    public bool IsTargetInTrigger()
+    void Awake()
+    {
+        animationComp = GetComponent<Animation>();
+    }
+
+    public bool IsUseable()
     {
         return area.containsPlayer;
     }
 
-    public async void MoveTargetToPosition()
+    public async void Use()
     {
-        isMovingTarget = true;
-        target.canMove = false;
-        target.canTurnCamera = false;
-        target.animator.Play("Player_Cutscene_GateSwitchOn");
+        if (isOpen)
+            return;
+        isOpen = true;
 
-        targetPosition = inputPosition;
-        targetRotation = inputRotation;
+        //isMovingTarget = true;
+        //target.canMove = false;
+        //target.canTurnCamera = false;
+        //target.animator.Play("Player_Cutscene_GateSwitchOn");
 
-        cachePosition = target.transform.position;
-        cachePosition.x = target.GetHorizontalRotation();
-        cachePosition.y = target.GetVerticalRotation();
+        //targetPosition = inputPosition;
+        //targetRotation = inputRotation;
 
-        await Task.Delay(3000);
-        FinishAnimation();
+        //cachedPosition = target.transform.position;
+        //cachedRotation.x = target.GetHorizontalRotation();
+        //cachedRotation.y = target.GetVerticalRotation();
+
+        animationComp.Play();
+        await Task.Delay(150);
+        AudioManager.PlaySound("LightSwitch");
+        //await Task.Delay(2000);
+        //FinishAnimation();
     }
 
     async void FinishAnimation()
@@ -46,21 +63,26 @@ public class GateSwitch : MonoBehaviour, Interactable
         target.canMove = true;
         target.canTurnCamera = true;
 
-        targetPosition = cachePosition;
-        targetRotation = cacheRotation;
+        targetPosition = cachedPosition;
+        targetRotation = cachedRotation;
 
-        await Task.Delay(1000);
+        await Task.Delay(500);
 
         isMovingTarget = false;
     }
 
     void Update()
     {
-        if (isMovingTarget)
-        {
-            target.SetPosition(Vector3.Lerp(target.transform.position, targetPosition, Time.deltaTime * targetLerpSpeed));
-            target.SetHorizontalRotation(Mathf.LerpAngle(target.GetHorizontalRotation(), targetRotation.x, targetLerpSpeed * Time.deltaTime));
-            target.SetVerticalRotation(Mathf.LerpAngle(target.GetVerticalRotation(), targetRotation.y, targetLerpSpeed * Time.deltaTime));
-        }
+        //if (isMovingTarget)
+        //{
+        //    target.SetPosition(Vector3.Lerp(target.transform.position, targetPosition, Time.deltaTime * targetLerpSpeed));
+        //    target.SetHorizontalRotation(Mathf.LerpAngle(target.GetHorizontalRotation(), targetRotation.x, targetLerpSpeed * Time.deltaTime));
+        //    target.SetVerticalRotation(Mathf.LerpAngle(target.GetVerticalRotation(), targetRotation.y, targetLerpSpeed * Time.deltaTime));
+        //}
+    }
+
+    public void Animation_PlayOpenSound()
+    {
+        AudioManager.PlaySound("OpenGate");
     }
 }

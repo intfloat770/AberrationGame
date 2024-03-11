@@ -2,20 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pickup : MonoBehaviour
+public class Pickup : MonoBehaviour, Interactable
 {
-    [SerializeField] Vector3 offset;
+    [SerializeField] ColliderArea area;
+    [SerializeField] Player player;
+    [SerializeField] GameObject gunProp;
+    [SerializeField] GameObject ammo;
 
-    // Start is called before the first frame update
-    void Start()
+    bool isUsed;
+
+    public bool IsUseable()
     {
-        
+        return area.containsPlayer;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Update()
     {
-        //transform.rotation = Quaternion.Inverse(Camera.main.transform.rotation * Quaternion.Euler(offset));
-        //transform.rotation = Camera.main.transform.rotation;
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (IsUseable() && !isUsed)
+            {
+                Use();
+            }
+        }
+    }
+
+    public void Use()
+    {
+        isUsed = true;
+        player.PickupGun();
+        ammo.SetActive(false);
+        gunProp.SetActive(false);
     }
 }
